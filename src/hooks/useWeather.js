@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const useWeather = () => {
   const [weatherData, setWeatherData] = useState({
@@ -20,7 +20,7 @@ const useWeather = () => {
   });
   const [error, setError] = useState(null);
 
-  const fetchWeatherData = async (latitude, longitute) => {
+  const fetchWeatherData = async (latitude, longitude) => {
     try {
       setLoading({
         ...loading,
@@ -29,8 +29,9 @@ const useWeather = () => {
       });
       // fetch call
       const response = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitute}&appid=${import.meta.env.VITE_WEATHER_API_KEY}&units=metric`,
+        `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${import.meta.env.VITE_WEATHER_API_KEY}&units=metric`,
       );
+      console.log("response", response);
       if (!response.ok) {
         const errorMessage = `Fetching weather data failed: ${response.status}`;
         throw new Error(errorMessage);
@@ -47,7 +48,7 @@ const useWeather = () => {
         cloudPercentage: data?.clouds?.all,
         wind: data?.wind?.speed,
         time: data?.dt,
-        longitute: longitute,
+        longitute: longitude,
         latitude: latitude,
       };
       setWeatherData(updateWeatherData);
@@ -60,6 +61,28 @@ const useWeather = () => {
         message: "",
       });
     }
+  };
+
+  useEffect(() => {
+    setLoading({
+      state: true,
+      message: "Loading Location",
+    });
+    navigator.geolocation.getCurrentPosition(function (position) {
+      fetchWeatherData(position.coords.latitude, position.coords.longitude);
+
+      console.log("fetch data", fetchWeatherData);
+    });
+    if (!navigator.geolocation) {
+      setError("Geolocation not supported");
+      return;
+    }
+  }, []);
+
+  return {
+    weatherData,
+    error,
+    loading,
   };
 };
 export default useWeather;
