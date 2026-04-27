@@ -1,11 +1,24 @@
+import { useContext } from "react";
+import { faviouriteContext, LocationContext } from "../../context";
+
 const FaviouriteListModal = () => {
+  const { faviourite } = useContext(faviouriteContext);
+  const { setSelectedLocation } = useContext(LocationContext);
   return (
     <div className="max-w-xs py-4 bg-white rounded-md border-gray-500 absolute right-0 top-16 text-black shadow-lg ">
       <h3 className="text-lg font-bold px-4">Favourite Locations</h3>
       <ul className="space-y-2 mt-4 *:py-2 *:px-4 *:cursor-pointer">
-        <li className="hover:bg-gray-200">Dhaka</li>
-        <li className="hover:bg-gray-200">Rangpur</li>
-        <li className="hover:bg-gray-200">Europe</li>
+        {faviourite.length > 0 ? (
+          faviourite.map((fav) => (
+            <li key={fav.location} className="hover:bg-gray-200">
+              <a onClick={() => setSelectedLocation({ ...fav })}>
+                {fav.location}
+              </a>
+            </li>
+          ))
+        ) : (
+          <p>Nothing is added to favourite</p>
+        )}
       </ul>
     </div>
   );
